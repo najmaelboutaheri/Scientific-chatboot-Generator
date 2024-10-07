@@ -31,7 +31,11 @@ def download_file_from_s3(s3_key, local_path):
         logging.info(f"Downloaded {s3_key} from S3 to {local_path}")
     except Exception as e:
         logging.error(f"Error downloading {s3_key}: {str(e)}")
-
+# Check if the model files already exist locally before downloading from S3
+def download_file_from_s3_if_not_exists(s3_key, local_path):
+    if not os.path.exists(local_path):
+        download_file_from_s3(s3_key, local_path)
+        
 def load_resources():
     global KNOWLEDGE_VECTOR_DATABASE, embedding_model, READER_LLM, RERANKER, RAG_PROMPT_TEMPLATE
     logging.debug("Loading resources...")
@@ -44,14 +48,14 @@ def load_resources():
     local_docs_processed = "docs_processed.pkl"
 
     # Download necessary files from S3
-    download_file_from_s3(S3_BASE_DIR + 'docs_processed.pkl', local_docs_processed)
+    download_file_from_s3_if_not_exists(S3_BASE_DIR + 'docs_processed.pkl', local_docs_processed)
     model_files = [
         'config.json', 'generation_config.json', 'model.safetensors', 'special_tokens_map.json',
         'tokenizer_config.json', 'tokenizer.json', 'tokenizer.model'
     ]
 
     for file in model_files:
-        download_file_from_s3(S3_BASE_DIR + file, os.path.join(local_model_dir, file))
+        download_file_from_s3_if_not_exists(S3_BASE_DIR + file, os.path.join(local_model_dir, file))
 
     # Load processed documents
     with open(local_docs_processed, "rb") as f:
