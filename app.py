@@ -6,7 +6,7 @@ from ragatouille import RAGPretrainedModel
 from langchain_community.vectorstores.utils import DistanceStrategy
 import logging
 from langchain_community.vectorstores import FAISS
-import time  # Optional: for simulating time taken for indexing
+import time
 import faiss
 import boto3
 import os
@@ -20,7 +20,6 @@ app = Flask(__name__)
 S3_BUCKET_NAME = 'chatboot-ressources'
 S3_BASE_DIR = 'quantized_model/'
 
-
 # Initialize S3 client
 s3 = boto3.client('s3')
 
@@ -31,11 +30,12 @@ def download_file_from_s3(s3_key, local_path):
         logging.info(f"Downloaded {s3_key} from S3 to {local_path}")
     except Exception as e:
         logging.error(f"Error downloading {s3_key}: {str(e)}")
+
 # Check if the model files already exist locally before downloading from S3
 def download_file_from_s3_if_not_exists(s3_key, local_path):
     if not os.path.exists(local_path):
         download_file_from_s3(s3_key, local_path)
-        
+
 def load_resources():
     global KNOWLEDGE_VECTOR_DATABASE, embedding_model, READER_LLM, RERANKER, RAG_PROMPT_TEMPLATE
     logging.debug("Loading resources...")
@@ -65,8 +65,7 @@ def load_resources():
     # Load embedding model
     embedding_model = HuggingFaceEmbeddings(
         model_name="thenlper/gte-small",  
-        multi_process=True,
-        model_kwargs={"device": "cpu"},  # Switch to GPU
+        model_kwargs={"device": "cpu"},  # Ensure using CPU
         encode_kwargs={"normalize_embeddings": True}
     )
     logging.debug("Embedding model loaded")
@@ -87,11 +86,11 @@ def load_resources():
     logging.debug("Knowledge vector database initialized")
 
     # Load reranker model
-    RERANKER = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0")
+    RERANKER = RAGPretrainedModel.from_pretrained("colbert-ir/colbertv2.0", device="cpu")  # Ensure using CPU
     logging.debug("Reranker model loaded")
 
     # Load quantized language model and tokenizer
-    model = AutoModelForCausalLM.from_pretrained(local_model_dir)
+    model = AutoModelForCausalLM.from_pretrained(local_model_dir, device_map='auto')  # Ensure using CPU
     tokenizer = AutoTokenizer.from_pretrained(local_model_dir)
     logging.debug("Language model and tokenizer loaded")
 
@@ -104,7 +103,8 @@ def load_resources():
         temperature=0.2,
         repetition_penalty=1.1,
         return_full_text=False,
-        max_new_tokens=500
+        max_new_tokens=500,
+        device="cpu"  # Ensure using CPU
     )
     logging.debug("Reader LLM initialized")
 
@@ -126,28 +126,36 @@ def load_resources():
 
 @app.route('/ask', methods=['POST'])
 def ask():
-    # Parse user query
-    data = request.get_json()
-    user_query = data.get("question", "")
-    
-    # Retrieve relevant documents
-    retrieved_docs = KNOWLEDGE_VECTOR_DATABASE.similarity_search(query=user_query, k=5)
-    retrieved_docs_text = [doc.page_content for doc in retrieved_docs]
-    
-    # Rerank relevant documents
-    relevant_docs = RERANKER.rerank(user_query, retrieved_docs_text, k=5)
-    relevant_docs = [doc["content"] for doc in relevant_docs]
+    try:
+        # Parse user query
+        data = request.get_json()
+        user_query = data.get("question", "")
+        
+        if not user_query:
+            return jsonify({"error": "No question provided"}), 400
+        
+        # Retrieve relevant documents
+        retrieved_docs = KNOWLEDGE_VECTOR_DATABASE.similarity_search(query=user_query, k=5)
+        retrieved_docs_text = [doc.page_content for doc in retrieved_docs]
+        
+        # Rerank relevant documents
+        relevant_docs = RERANKER.rerank(user_query, retrieved_docs_text, k=5)
+        relevant_docs = [doc["content"] for doc in relevant_docs]
 
-    # Construct context from retrieved documents
-    context = "\nExtracted documents:\n"
-    context += "".join([f"Document {str(i)}::\n" + doc for i, doc in enumerate(relevant_docs)])
+        # Construct context from retrieved documents
+        context = "\nExtracted documents:\n"
+        context += "".join([f"Document {str(i)}::\n" + doc for i, doc in enumerate(relevant_docs)])
 
-    # Format the final prompt
-    final_prompt = RAG_PROMPT_TEMPLATE.format(question=user_query, context=context)
+        # Format the final prompt
+        final_prompt = RAG_PROMPT_TEMPLATE.format(question=user_query, context=context)
 
-    # Generate the answer from the LLM
-    answer = READER_LLM(final_prompt)[0]["generated_text"]
-    return jsonify({"answer": answer, "relevant_docs": relevant_docs})
+        # Generate the answer from the LLM
+        answer = READER_LLM(final_prompt)[0]["generated_text"]
+        return jsonify({"answer": answer, "relevant_docs": relevant_docs})
+
+    except Exception as e:
+        logging.error(f"Error in ask route: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 # Main Flask app entry point
 if __name__ == '__main__':
