@@ -66,7 +66,7 @@ def load_resources():
     embedding_model = HuggingFaceEmbeddings(
         model_name="thenlper/gte-small",  
         multi_process=True,
-        model_kwargs={"device": "cuda"},  # Switch to GPU
+        model_kwargs={"device": "cpu"},  # Switch to GPU
         encode_kwargs={"normalize_embeddings": True}
     )
     logging.debug("Embedding model loaded")
