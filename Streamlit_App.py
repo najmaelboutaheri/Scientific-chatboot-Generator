@@ -4,7 +4,7 @@ from pyngrok import ngrok
 
 # Run Streamlit app
 def run_streamlit():
-    process = subprocess.Popen(['streamlit', 'run', 'app_chatbot.py'])
+    process = subprocess.Popen(['streamlit', 'run', 'app.py'])
     return process
 
 # Establish ngrok tunnel
