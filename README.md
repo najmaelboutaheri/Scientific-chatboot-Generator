@@ -22,8 +22,9 @@ This project implements a Retrieval-Augmented Generation (RAG) Scientific Chatbo
 - Transformers (for the language model)
 - FAISS (for efficient similarity search)
 - EC2 Gpu based instance to deploy the app and interact with the chatbot
+- Install Nvidia 
 
-## Setup
+## Setup within EC2 insatnce
 
 1. Clone the repository:
    ```bash
@@ -40,16 +41,34 @@ This project implements a Retrieval-Augmented Generation (RAG) Scientific Chatbo
    pip install -r requirements.txt
    ```
 4. Set up the environment variables if necessary (specify any required environment variables).
-   
-## Usage
 
-1. Start the application:
-   ```bash
-   streamlit run app.py
-   ```
-2. Open your browser and navigate to the **EC2 instance's public IP address**to access the app.
-3. Interact with the chatbot through the provided interface.
+## Steps Taken throughtout the deployment phase:
+
+1. Find the EC2 Instance’s Public DNS or IP Address and verify that the type is **g4dn.xlarge**
+   <img width="732" alt="project1" src="https://github.com/user-attachments/assets/6220533b-ee67-488f-b69f-5f67e5382bb0">
    
+2. Connect to the EC2 Instance via SSH
+   ```bash
+   ssh -i /path/to/your-key.pem ec2-user@your-public-dns
+   ```
+3. Accept the Security Warning : yes
+4. You may need to set Permissions for the Key Pair as follows:
+   ```bash
+   chmod 400 /path/to/your-key.pem
+   ```
+5. You need to install CUDA Toolkit to utilize GPU resources for PyTorch.
+   ```bash
+   nvcc --version  # Check if nvcc is installed
+   sudo apt install nvidia-cuda-toolkit  # Install CUDA Toolkit
+   ```
+   <img width="698" alt="project3" src="https://github.com/user-attachments/assets/ccc0560e-d7f6-4d8a-af94-b3e5b5374718">
+   
+6. After cloning the Project Repository inside the EC2 instance and installing the required packages you need to run the streamlit app file ```streamlit run app.py``` and acess the  **ngrok tunells** links or you can sart the application with **EC2 instance's public IP address**
+
+   <img width="959" alt="project4" src="https://github.com/user-attachments/assets/cb6b875d-6a0b-49bf-a27f-091125a579c7">
+   
+7. Interact with the chatbot through the provided interface.
+
 ## Contributing
 
 If you'd like to contribute to this project, please fork the repository and submit a pull request. For major changes, please open an issue first to discuss what you would like to change.
