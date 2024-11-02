@@ -17,7 +17,6 @@ This project implements a Retrieval-Augmented Generation (RAG) Scientific Chatbo
 ## Requirements
 
 - Python 3.7 or higher
-- Flask (for the backend)
 - Streamlit (for the frontend)
 - Transformers (for the language model)
 - FAISS (for efficient similarity search)
@@ -45,6 +44,7 @@ This project implements a Retrieval-Augmented Generation (RAG) Scientific Chatbo
 ## Steps Taken throughtout the deployment phase:
 
 1. Find the EC2 Instance’s Public DNS or IP Address and verify that the type is **g4dn.xlarge**
+
    <img width="732" alt="project1" src="https://github.com/user-attachments/assets/6220533b-ee67-488f-b69f-5f67e5382bb0">
    
 2. Connect to the EC2 Instance via SSH
