@@ -69,11 +69,11 @@ This project implements a Retrieval-Augmented Generation (RAG) Scientific Chatbo
    
 7. Interact with the chatbot through the provided interface.
 
-   ![cahtboot](https://github.com/user-attachments/assets/974918ed-6d1b-4bbd-94ad-79b7104c43a1)
-   
+   ![cahtboot](https://github.com/user-attachments/assets/cffdfca8-08aa-4ebf-900f-6cc38c28c516)
+
 8. The retrieved documents:
 
-   <img width="558" alt="image" src="https://github.com/user-attachments/assets/b6f9b72a-22de-4766-9476-aa8f3a83e552" />
+   <img width="558" alt="image" src="https://github.com/user-attachments/assets/b6f9b72a-22de-4766-9476-aa8f3a83e552"/>
    
 
    
