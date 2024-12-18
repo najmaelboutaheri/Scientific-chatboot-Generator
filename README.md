@@ -65,7 +65,8 @@ This project implements a Retrieval-Augmented Generation (RAG) Scientific Chatbo
    
 6. After cloning the Project Repository inside the EC2 instance and installing the required packages you need to run the streamlit app file ```streamlit run app.py``` and acess the  **ngrok tunells** links or you can sart the application with **EC2 instance's public IP address**
 
-   <img width="959" alt="project4" src="https://github.com/user-attachments/assets/cb6b875d-6a0b-49bf-a27f-091125a579c7">
+   ![382511484-cb6b875d-6a0b-49bf-a27f-091125a579c7](https://github.com/user-attachments/assets/f0b037cf-da39-42ed-ae35-be9ba4f4db29)
+
    
 7. Interact with the chatbot through the provided interface.
 
